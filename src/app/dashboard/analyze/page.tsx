@@ -52,65 +52,78 @@ export default function StockAnalysisPage() {
     }
   };
 
-  if (!isInitialized) return null;
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <Activity className="animate-spin text-primary w-8 h-8" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-headline font-bold text-primary">AI Stock Analysis</h1>
-          <p className="text-muted-foreground font-body">Strategy tool for risk, sector concentration, and equity growth.</p>
+          <h1 className="text-3xl font-headline font-bold text-primary">Stock Analysis</h1>
+          <p className="text-muted-foreground font-body">AI-powered analysis of your stock portfolio.</p>
         </div>
         <Button 
           onClick={handleAnalyze} 
           disabled={isAnalyzing || investments.length === 0} 
-          className="bg-primary hover:bg-primary/90 text-white font-headline gap-2 h-12 px-8 shadow-lg shadow-primary/20"
+          className="bg-primary hover:bg-primary/90 text-white font-headline font-bold gap-2 h-14 px-10 shadow-xl shadow-primary/20"
         >
           {isAnalyzing ? (
-            <span className="flex items-center gap-2"><Activity className="w-5 h-5 animate-spin" /> Analyzing Stocks...</span>
+            <span className="flex items-center gap-3"><Activity className="w-5 h-5 animate-spin" /> Analyzing Portfolio...</span>
           ) : (
-            <span className="flex items-center gap-2"><Sparkles className="w-5 h-5" /> Generate Strategy Report</span>
+            <span className="flex items-center gap-3"><Sparkles className="w-5 h-5" /> Generate Stock Analysis</span>
           )}
         </Button>
       </div>
 
       {!report && !isAnalyzing && (
-        <div className="flex flex-col items-center justify-center py-24 text-center space-y-6 bg-white rounded-3xl border border-primary/5 shadow-sm">
-          <div className="p-8 bg-primary/5 rounded-full">
-            <Sparkles className="w-16 h-16 text-primary opacity-40" />
+        <div className="flex flex-col items-center justify-center py-32 text-center space-y-8 bg-white rounded-3xl border border-primary/5 shadow-sm px-6">
+          <div className="p-10 bg-primary/5 rounded-full">
+            <Sparkles className="w-20 h-20 text-primary opacity-30" />
           </div>
-          <div className="space-y-2 max-w-md">
-            <h2 className="text-2xl font-headline font-bold text-primary">Ready for Market Intelligence?</h2>
-            <p className="text-muted-foreground font-body">
+          <div className="space-y-3 max-w-lg">
+            <h2 className="text-3xl font-headline font-bold text-primary">Intelligent Market Insight</h2>
+            <p className="text-muted-foreground font-body text-lg leading-relaxed">
               {investments.length > 0 
-                ? `Our AI will evaluate your ${investments.length} stock positions and generate a professional equity strategy.`
-                : "Add some stocks to your registry to begin AI analysis."}
+                ? `Our AI model will evaluate your ${investments.length} stock positions for risk, allocation, and growth potential.`
+                : "Add stock positions to your registry to begin AI-driven portfolio analysis."}
             </p>
           </div>
         </div>
       )}
 
       {isAnalyzing && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-48 bg-secondary rounded-3xl" />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-pulse">
+          <div className="col-span-full h-40 bg-secondary/50 rounded-3xl" />
+          <div className="h-64 bg-secondary/30 rounded-3xl" />
+          <div className="h-64 bg-secondary/30 rounded-3xl" />
+          <div className="col-span-full h-48 bg-secondary/20 rounded-3xl" />
         </div>
       )}
 
       {report && (
-        <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
-          <Card className="border-none shadow-md overflow-hidden">
-            <div className="bg-primary p-1" />
-            <CardHeader className="flex flex-row items-center justify-between gap-4">
-              <div>
-                <CardTitle className="text-2xl font-headline">Overall Equity Health</CardTitle>
-                <CardDescription className="text-base font-body mt-2">{report.portfolioHealth.summary}</CardDescription>
+        <div className="space-y-10 animate-in slide-in-from-bottom-6 duration-700">
+          <Card className="border-none shadow-lg overflow-hidden bg-white">
+            <div className="bg-primary h-2 w-full" />
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-8">
+              <div className="space-y-3">
+                <CardTitle className="text-3xl font-headline font-bold text-primary">Overall Stock Health</CardTitle>
+                <p className="text-lg font-body text-muted-foreground leading-relaxed italic border-l-4 border-primary/20 pl-4">
+                  "{report.portfolioHealth.summary}"
+                </p>
               </div>
-              <div className="text-right">
-                <Badge variant="outline" className={cn(
-                  "text-lg font-headline px-4 py-2 border-2",
-                  report.portfolioHealth.overallStatus === 'Excellent' || report.portfolioHealth.overallStatus === 'Good' ? 'text-accent border-accent bg-accent/5' : 'text-amber-500 border-amber-500 bg-amber-50'
+              <div className="shrink-0">
+                <Badge className={cn(
+                  "text-xl font-headline font-bold px-6 py-3 rounded-2xl border-none shadow-sm",
+                  report.portfolioHealth.overallStatus === 'Excellent' || report.portfolioHealth.overallStatus === 'Good' 
+                    ? 'bg-accent text-white' 
+                    : report.portfolioHealth.overallStatus === 'Moderate'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-destructive text-white'
                 )}>
                   {report.portfolioHealth.overallStatus}
                 </Badge>
@@ -118,19 +131,19 @@ export default function StockAnalysisPage() {
             </CardHeader>
           </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div className="space-y-6">
-              <h3 className="text-xl font-headline font-bold text-primary flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-accent" /> Market Allocation
+              <h3 className="text-2xl font-headline font-bold text-primary flex items-center gap-3">
+                <TrendingUp className="w-6 h-6 text-accent" /> Allocation Insights
               </h3>
-              <div className="grid gap-4">
+              <div className="grid gap-6">
                 {report.allocationInsights.map((insight, idx) => (
-                  <Card key={idx} className="border-none shadow-sm hover:translate-x-1 transition-transform">
+                  <Card key={idx} className="border-none shadow-sm hover:translate-x-1 transition-transform bg-white">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base font-headline font-bold text-primary">{insight.category}</CardTitle>
+                      <CardTitle className="text-lg font-headline font-bold text-primary">{insight.category}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm font-body text-muted-foreground leading-relaxed">{insight.details}</p>
+                      <p className="text-base font-body text-muted-foreground leading-relaxed">{insight.details}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -138,18 +151,20 @@ export default function StockAnalysisPage() {
             </div>
 
             <div className="space-y-6">
-              <h3 className="text-xl font-headline font-bold text-primary flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-500" /> Stock Concentration Risk
+              <h3 className="text-2xl font-headline font-bold text-primary flex items-center gap-3">
+                <AlertTriangle className="w-6 h-6 text-amber-500" /> Concentration Risk
               </h3>
-              <div className="grid gap-4">
+              <div className="grid gap-6">
                 {report.concentrationInsights.map((insight, idx) => (
-                  <Card key={idx} className="border-none shadow-sm border-l-4 border-l-amber-400">
+                  <Card key={idx} className="border-none shadow-sm border-l-8 border-l-amber-400 bg-white">
                     <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                      <CardTitle className="text-base font-headline font-bold text-primary">{insight.area}</CardTitle>
-                      <Badge variant="secondary" className="font-headline text-[10px] tracking-widest">{insight.riskLevel} Risk</Badge>
+                      <CardTitle className="text-lg font-headline font-bold text-primary">{insight.area}</CardTitle>
+                      <Badge variant="secondary" className="font-headline font-bold text-[10px] tracking-widest uppercase">
+                        {insight.riskLevel} Risk
+                      </Badge>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm font-body text-muted-foreground leading-relaxed">{insight.details}</p>
+                      <p className="text-base font-body text-muted-foreground leading-relaxed">{insight.details}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -157,23 +172,25 @@ export default function StockAnalysisPage() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-xl font-headline font-bold text-primary flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-accent" /> Strategic Stock Suggestions
+          <div className="space-y-8 bg-secondary/20 p-8 md:p-12 rounded-[2.5rem] border border-primary/5">
+            <h3 className="text-2xl font-headline font-bold text-primary flex items-center gap-3">
+              <Lightbulb className="w-6 h-6 text-accent" /> Strategic Suggestions
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {report.suggestions.map((sug, idx) => (
-                <Card key={idx} className="border-none shadow-sm bg-white hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex justify-between items-start mb-2">
-                      <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none font-headline text-[10px] uppercase">
+                <Card key={idx} className="border-none shadow-sm bg-white hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none font-headline font-bold text-[10px] uppercase tracking-tighter">
                         {sug.type}
                       </Badge>
-                      <Badge variant={sug.priority === 'High' ? 'destructive' : 'secondary'} className="font-headline text-[10px]">
+                      <Badge variant={sug.priority === 'High' ? 'destructive' : 'secondary'} className="font-headline font-bold text-[10px] uppercase tracking-tighter">
                         {sug.priority} Priority
                       </Badge>
                     </div>
-                    <CardTitle className="text-base font-headline font-bold text-primary mt-2">{sug.description}</CardTitle>
+                    <CardTitle className="text-lg font-headline font-bold text-primary leading-tight">
+                      {sug.description}
+                    </CardTitle>
                   </CardHeader>
                 </Card>
               ))}

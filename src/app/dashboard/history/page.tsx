@@ -7,62 +7,72 @@ import {
   Calendar, 
   ChevronRight, 
   FileText,
-  Clock
+  Clock,
+  Activity
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
-export default function HistoryPage() {
+export default function SnapshotHistoryPage() {
   const { history = [], isInitialized } = usePortfolioStore();
 
-  if (!isInitialized) return null;
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <Activity className="animate-spin text-primary w-8 h-8" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-headline font-bold text-primary">Equity Snapshot Ledger</h1>
-        <p className="text-muted-foreground font-body">Historical records of AI stock analysis and portfolio health.</p>
+        <h1 className="text-3xl font-headline font-bold text-primary">Snapshot History</h1>
+        <p className="text-muted-foreground font-body">View past stock analysis reports.</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {history && history.length > 0 ? (
           history.map((item) => (
-            <Card key={item.id} className="border-none shadow-sm hover:shadow-md transition-all group cursor-pointer overflow-hidden">
+            <Card key={item.id} className="border-none shadow-sm hover:shadow-md transition-all group overflow-hidden bg-white">
               <CardContent className="p-0">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center">
-                  <div className={`w-full sm:w-3 sm:min-h-[120px] h-2 ${
+                  <div className={cn(
+                    "w-full sm:w-2 sm:min-h-[120px] h-2",
                     item.status === 'Excellent' || item.status === 'Good' 
                       ? 'bg-accent' 
                       : item.status === 'Moderate' 
                         ? 'bg-amber-400' 
                         : 'bg-destructive'
-                  }`} />
+                  )} />
                   
-                  <div className="flex-1 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="font-headline text-[10px] tracking-widest text-primary border-primary/20">
+                  <div className="flex-1 p-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                    <div className="space-y-3 flex-1">
+                      <div className="flex items-center gap-4">
+                        <Badge className={cn(
+                          "font-headline font-bold text-[10px] tracking-widest uppercase border-none px-3 py-1",
+                          item.status === 'Excellent' || item.status === 'Good' ? 'bg-accent/10 text-accent' : 'bg-amber-400/10 text-amber-600'
+                        )}>
                           {item.status}
                         </Badge>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-body">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-body font-medium">
                           <Calendar className="w-3.5 h-3.5" />
-                          {new Date(item.date).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                          {new Date(item.date).toLocaleDateString('en-GB')}
                         </div>
                       </div>
-                      <p className="text-sm font-body text-foreground leading-relaxed">
-                        {item.summary}
+                      <p className="text-sm md:text-base font-body text-foreground leading-relaxed max-w-2xl italic">
+                        "{item.summary}"
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-4 shrink-0">
                       <Link href="/dashboard/analyze">
-                        <Button variant="ghost" className="gap-2 font-headline text-xs hover:bg-primary/5 hover:text-primary">
+                        <Button variant="ghost" className="gap-2 font-headline font-bold text-xs hover:bg-primary/5 hover:text-primary h-10 px-5">
                           <FileText className="w-4 h-4" /> Review Analysis
                         </Button>
                       </Link>
-                      <div className="hidden sm:block">
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-1 transition-all hidden sm:block" />
                     </div>
                   </div>
                 </div>
@@ -70,14 +80,14 @@ export default function HistoryPage() {
             </Card>
           ))
         ) : (
-          <div className="py-24 text-center bg-white rounded-3xl border border-primary/5">
-            <div className="p-6 bg-secondary rounded-full inline-flex mb-4">
-              <Clock className="w-12 h-12 text-primary opacity-20" />
+          <div className="py-32 text-center bg-white rounded-3xl border border-primary/5 shadow-sm">
+            <div className="p-10 bg-secondary/50 rounded-full inline-flex mb-6">
+              <Clock className="w-16 h-16 text-primary opacity-20" />
             </div>
-            <h2 className="text-xl font-headline font-bold text-primary">No Snapshot History</h2>
-            <p className="text-muted-foreground font-body max-w-sm mx-auto mt-2">Analysis records will appear here after you run your first AI stock health check.</p>
-            <Link href="/dashboard/analyze" className="mt-6 inline-block">
-              <Button className="bg-primary hover:bg-primary/90 text-white font-headline">
+            <h2 className="text-2xl font-headline font-bold text-primary">No Snapshot History</h2>
+            <p className="text-muted-foreground font-body max-w-sm mx-auto mt-2 text-lg">Your AI stock reports will be archived here once generated.</p>
+            <Link href="/dashboard/analyze" className="mt-8 inline-block">
+              <Button className="bg-primary hover:bg-primary/90 text-white font-headline font-bold px-8 h-12 shadow-lg shadow-primary/20">
                 Analyze Stock Portfolio
               </Button>
             </Link>
@@ -86,9 +96,9 @@ export default function HistoryPage() {
       </div>
 
       {history && history.length > 0 && (
-        <div className="pt-8 border-t flex items-center justify-center">
-          <p className="text-xs text-muted-foreground font-body italic">
-            End of historical records.
+        <div className="pt-12 border-t flex items-center justify-center">
+          <p className="text-xs text-muted-foreground font-body font-medium tracking-widest uppercase opacity-40">
+            End of snapshot history
           </p>
         </div>
       )}

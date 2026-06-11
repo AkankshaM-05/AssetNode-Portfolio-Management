@@ -47,7 +47,7 @@ const DEFAULT_HISTORY: AnalysisHistory[] = [
   {
     id: 'h1',
     date: new Date('2024-02-10').toISOString(),
-    summary: 'Stock portfolio is well-diversified with low concentration risk across key technology holdings.',
+    summary: 'The stock portfolio shows strong performance with key technology holdings driving growth. Diversification is healthy across large-cap tech.',
     status: 'Good',
   },
 ];
