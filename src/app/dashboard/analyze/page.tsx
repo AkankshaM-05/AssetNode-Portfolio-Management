@@ -11,13 +11,13 @@ import {
   CheckCircle2, 
   Activity, 
   Sparkles,
-  ArrowRight,
   TrendingUp,
   AlertTriangle
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
-export default function AnalysisPage() {
+export default function StockAnalysisPage() {
   const { investments, addHistory, isInitialized } = usePortfolioStore();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [report, setReport] = useState<GeneratePortfolioInsightsOutput | null>(null);
@@ -27,7 +27,6 @@ export default function AnalysisPage() {
     setReport(null);
     
     try {
-      // Prepare input for AI flow
       const input = {
         investments: investments.map(inv => ({
           assetType: inv.assetType,
@@ -41,7 +40,6 @@ export default function AnalysisPage() {
       const result = await generatePortfolioInsights(input);
       setReport(result);
       
-      // Save to local history
       addHistory({
         date: new Date().toISOString(),
         summary: result.portfolioHealth.summary,
@@ -60,18 +58,18 @@ export default function AnalysisPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-headline font-bold text-primary">AI Portfolio Strategy Tool</h1>
-          <p className="text-muted-foreground font-body">Deep analysis of risk, concentration, and diversification.</p>
+          <h1 className="text-3xl font-headline font-bold text-primary">AI Stock Analysis</h1>
+          <p className="text-muted-foreground font-body">Strategy tool for risk, sector concentration, and equity growth.</p>
         </div>
         <Button 
           onClick={handleAnalyze} 
-          disabled={isAnalyzing} 
+          disabled={isAnalyzing || investments.length === 0} 
           className="bg-primary hover:bg-primary/90 text-white font-headline gap-2 h-12 px-8 shadow-lg shadow-primary/20"
         >
           {isAnalyzing ? (
-            <span className="flex items-center gap-2"><Activity className="w-5 h-5 animate-spin" /> Analyzing Positions...</span>
+            <span className="flex items-center gap-2"><Activity className="w-5 h-5 animate-spin" /> Analyzing Stocks...</span>
           ) : (
-            <span className="flex items-center gap-2"><Sparkles className="w-5 h-5" /> Start Full Analysis</span>
+            <span className="flex items-center gap-2"><Sparkles className="w-5 h-5" /> Generate Strategy Report</span>
           )}
         </Button>
       </div>
@@ -82,8 +80,12 @@ export default function AnalysisPage() {
             <Sparkles className="w-16 h-16 text-primary opacity-40" />
           </div>
           <div className="space-y-2 max-w-md">
-            <h2 className="text-2xl font-headline font-bold text-primary">Ready for Intelligence?</h2>
-            <p className="text-muted-foreground font-body">Our AI will evaluate your holdings across {investments.length} positions and generate a professional-grade strategy report.</p>
+            <h2 className="text-2xl font-headline font-bold text-primary">Ready for Market Intelligence?</h2>
+            <p className="text-muted-foreground font-body">
+              {investments.length > 0 
+                ? `Our AI will evaluate your ${investments.length} stock positions and generate a professional equity strategy.`
+                : "Add some stocks to your registry to begin AI analysis."}
+            </p>
           </div>
         </div>
       )}
@@ -98,12 +100,11 @@ export default function AnalysisPage() {
 
       {report && (
         <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
-          {/* Summary Section */}
           <Card className="border-none shadow-md overflow-hidden">
             <div className="bg-primary p-1" />
             <CardHeader className="flex flex-row items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-2xl font-headline">Overall Portfolio Health</CardTitle>
+                <CardTitle className="text-2xl font-headline">Overall Equity Health</CardTitle>
                 <CardDescription className="text-base font-body mt-2">{report.portfolioHealth.summary}</CardDescription>
               </div>
               <div className="text-right">
@@ -118,10 +119,9 @@ export default function AnalysisPage() {
           </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Allocation Insights */}
             <div className="space-y-6">
               <h3 className="text-xl font-headline font-bold text-primary flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-accent" /> Allocation Insights
+                <TrendingUp className="w-5 h-5 text-accent" /> Market Allocation
               </h3>
               <div className="grid gap-4">
                 {report.allocationInsights.map((insight, idx) => (
@@ -137,10 +137,9 @@ export default function AnalysisPage() {
               </div>
             </div>
 
-            {/* Concentration Insights */}
             <div className="space-y-6">
               <h3 className="text-xl font-headline font-bold text-primary flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-500" /> Risk & Concentration
+                <AlertTriangle className="w-5 h-5 text-amber-500" /> Stock Concentration Risk
               </h3>
               <div className="grid gap-4">
                 {report.concentrationInsights.map((insight, idx) => (
@@ -158,10 +157,9 @@ export default function AnalysisPage() {
             </div>
           </div>
 
-          {/* Suggestions */}
           <div className="space-y-6">
             <h3 className="text-xl font-headline font-bold text-primary flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-accent" /> Strategic Suggestions
+              <Lightbulb className="w-5 h-5 text-accent" /> Strategic Stock Suggestions
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {report.suggestions.map((sug, idx) => (

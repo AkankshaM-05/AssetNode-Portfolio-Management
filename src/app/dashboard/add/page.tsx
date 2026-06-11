@@ -7,11 +7,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function AddInvestmentPage() {
+export default function AddStockPage() {
   const router = useRouter();
   const { addInvestment } = usePortfolioStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -61,8 +60,8 @@ export default function AddInvestmentPage() {
         <div className="p-6 bg-accent/10 rounded-full">
           <CheckCircle2 className="w-16 h-16 text-accent" />
         </div>
-        <h2 className="text-3xl font-headline font-bold text-primary">Asset Logged Successfully</h2>
-        <p className="text-muted-foreground font-body">The investment has been added to your portfolio registry.</p>
+        <h2 className="text-3xl font-headline font-bold text-primary">Stock Logged Successfully</h2>
+        <p className="text-muted-foreground font-body">The position has been added to your equity registry.</p>
         <p className="text-sm text-primary animate-pulse font-headline">Redirecting to registry...</p>
       </div>
     );
@@ -77,15 +76,15 @@ export default function AddInvestmentPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-headline font-bold text-primary">Smart Asset Registry</h1>
-          <p className="text-muted-foreground font-body">Log new acquisitions to track wealth growth.</p>
+          <h1 className="text-3xl font-headline font-bold text-primary">Equity Registry</h1>
+          <p className="text-muted-foreground font-body">Log a new stock acquisition to your portfolio.</p>
         </div>
       </div>
 
       <Card className="max-w-2xl border-none shadow-sm mx-auto">
         <CardHeader>
-          <CardTitle className="text-xl font-headline">Investment Details</CardTitle>
-          <CardDescription>Enter the primary metrics for your stock acquisition.</CardDescription>
+          <CardTitle className="text-xl font-headline">Stock Details</CardTitle>
+          <CardDescription>Enter the primary metrics for your new equity position.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
@@ -96,22 +95,11 @@ export default function AddInvestmentPage() {
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="assetType">Asset Type</Label>
-                <Select defaultValue="Stock" disabled>
-                  <SelectTrigger className="bg-secondary/30 border-secondary">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Stock">Public Equity (Stock)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Company Name</Label>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="companyName">Company Name / Ticker</Label>
                 <Input 
                   id="companyName" 
-                  placeholder="e.g. Nvidia Corp" 
+                  placeholder="e.g. Nvidia Corp (NVDA)" 
                   required 
                   className="bg-secondary/30 border-secondary"
                   value={formData.companyName}
@@ -119,7 +107,7 @@ export default function AddInvestmentPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity</Label>
+                <Label htmlFor="quantity">Quantity (Shares)</Label>
                 <Input 
                   id="quantity" 
                   type="number" 
@@ -132,7 +120,7 @@ export default function AddInvestmentPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="buyPrice">Purchase Price (USD)</Label>
+                <Label htmlFor="buyPrice">Purchase Price (USD per share)</Label>
                 <Input 
                   id="buyPrice" 
                   type="number" 
@@ -145,7 +133,7 @@ export default function AddInvestmentPage() {
                 />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="purchaseDate">Purchase Date</Label>
+                <Label htmlFor="purchaseDate">Date of Acquisition</Label>
                 <Input 
                   id="purchaseDate" 
                   type="date" 
@@ -163,7 +151,7 @@ export default function AddInvestmentPage() {
               className="flex-1 bg-primary hover:bg-primary/90 text-white font-headline"
               disabled={isLoading}
             >
-              {isLoading ? 'Processing...' : 'Save Investment'}
+              {isLoading ? 'Processing...' : 'Save Stock Position'}
             </Button>
             <Link href="/dashboard" className="flex-1">
               <Button type="button" variant="outline" className="w-full font-headline border-primary/20">

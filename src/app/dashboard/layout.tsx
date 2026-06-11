@@ -11,8 +11,7 @@ import {
   History, 
   LogOut,
   ShieldCheck,
-  Menu,
-  X
+  Menu
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -20,10 +19,10 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const NAV_ITEMS = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Investments', href: '/dashboard/investments', icon: ListOrdered },
-  { label: 'Add Investment', href: '/dashboard/add', icon: PlusCircle },
-  { label: 'Analyze Portfolio', href: '/dashboard/analyze', icon: BarChart3 },
-  { label: 'History', href: '/dashboard/history', icon: History },
+  { label: 'Stock Registry', href: '/dashboard/investments', icon: ListOrdered },
+  { label: 'Log New Stock', href: '/dashboard/add', icon: PlusCircle },
+  { label: 'Market Analysis', href: '/dashboard/analyze', icon: BarChart3 },
+  { label: 'Snapshot History', href: '/dashboard/history', icon: History },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

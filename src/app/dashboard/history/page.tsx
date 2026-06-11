@@ -20,8 +20,8 @@ export default function HistoryPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-headline font-bold text-primary">Relational History Ledger</h1>
-        <p className="text-muted-foreground font-body">Historical snapshots of portfolio health and AI analysis.</p>
+        <h1 className="text-3xl font-headline font-bold text-primary">Equity Snapshot Ledger</h1>
+        <p className="text-muted-foreground font-body">Historical records of AI stock analysis and portfolio health.</p>
       </div>
 
       <div className="space-y-4">
@@ -30,8 +30,7 @@ export default function HistoryPage() {
             <Card key={item.id} className="border-none shadow-sm hover:shadow-md transition-all group cursor-pointer overflow-hidden">
               <CardContent className="p-0">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center">
-                  {/* Status Indicator Bar */}
-                  <div className={`w-full sm:w-3 sm:h-auto h-2 ${
+                  <div className={`w-full sm:w-3 sm:min-h-[120px] h-2 ${
                     item.status === 'Excellent' || item.status === 'Good' 
                       ? 'bg-accent' 
                       : item.status === 'Moderate' 
@@ -58,7 +57,7 @@ export default function HistoryPage() {
                     <div className="flex items-center gap-3 shrink-0">
                       <Link href="/dashboard/analyze">
                         <Button variant="ghost" className="gap-2 font-headline text-xs hover:bg-primary/5 hover:text-primary">
-                          <FileText className="w-4 h-4" /> View Full Details
+                          <FileText className="w-4 h-4" /> Review Analysis
                         </Button>
                       </Link>
                       <div className="hidden sm:block">
@@ -75,22 +74,21 @@ export default function HistoryPage() {
             <div className="p-6 bg-secondary rounded-full inline-flex mb-4">
               <Clock className="w-12 h-12 text-primary opacity-20" />
             </div>
-            <h2 className="text-xl font-headline font-bold text-primary">No Ledger Records Found</h2>
-            <p className="text-muted-foreground font-body max-w-sm mx-auto mt-2">Previous analysis records will appear here after you run your first portfolio health check.</p>
+            <h2 className="text-xl font-headline font-bold text-primary">No Snapshot History</h2>
+            <p className="text-muted-foreground font-body max-w-sm mx-auto mt-2">Analysis records will appear here after you run your first AI stock health check.</p>
             <Link href="/dashboard/analyze" className="mt-6 inline-block">
               <Button className="bg-primary hover:bg-primary/90 text-white font-headline">
-                Analyze Portfolio Now
+                Analyze Stock Portfolio
               </Button>
             </Link>
           </div>
         )}
       </div>
 
-      {/* Pagination Placeholder */}
       {history && history.length > 0 && (
         <div className="pt-8 border-t flex items-center justify-center">
           <p className="text-xs text-muted-foreground font-body italic">
-            End of records. Integration with PostgreSQL will enable unlimited historical storage.
+            End of historical records.
           </p>
         </div>
       )}

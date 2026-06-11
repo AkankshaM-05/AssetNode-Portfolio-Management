@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
   Activity, 
-  Layers, 
   ArrowRight, 
   Plus, 
   BarChart as BarChartIcon, 
@@ -27,13 +26,13 @@ export default function DashboardPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-headline font-bold text-primary">Dashboard</h1>
-          <p className="text-muted-foreground font-body">Real-time portfolio intelligence and oversight.</p>
+          <h1 className="text-3xl md:text-4xl font-headline font-bold text-primary">Stock Intelligence</h1>
+          <p className="text-muted-foreground font-body">Real-time oversight of your public equity holdings.</p>
         </div>
         <div className="flex gap-2">
            <Link href="/dashboard/add">
             <Button className="bg-primary hover:bg-primary/90 text-white font-headline gap-2">
-              <Plus className="w-4 h-4" /> Add Investment
+              <Plus className="w-4 h-4" /> Log New Stock
             </Button>
           </Link>
         </div>
@@ -43,13 +42,13 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card className="border-none shadow-sm bg-primary text-white">
           <CardHeader className="pb-2">
-            <CardDescription className="text-primary-foreground/70 font-headline font-medium uppercase tracking-wider text-xs">Total Portfolio Value</CardDescription>
+            <CardDescription className="text-primary-foreground/70 font-headline font-medium uppercase tracking-wider text-xs">Total Stock Equity</CardDescription>
             <CardTitle className="text-3xl font-headline font-bold">{formattedValue}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-1 text-accent text-sm font-medium">
               <TrendingUp className="w-4 h-4" />
-              <span>+4.2% from last month</span>
+              <span>+4.2% Estimated Return</span>
             </div>
           </CardContent>
         </Card>
@@ -69,11 +68,11 @@ export default function DashboardPage() {
 
         <Card className="border-none shadow-sm sm:col-span-2 lg:col-span-1">
           <CardHeader className="pb-2">
-            <CardDescription className="text-muted-foreground font-headline font-medium uppercase tracking-wider text-xs">Active Investments</CardDescription>
+            <CardDescription className="text-muted-foreground font-headline font-medium uppercase tracking-wider text-xs">Active Stocks</CardDescription>
             <CardTitle className="text-3xl font-headline font-bold text-primary">{investments.length}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground font-body">Stocks: {investments.length} | ETF: 0</p>
+            <p className="text-sm text-muted-foreground font-body">Equity Positions: {investments.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -118,7 +117,7 @@ export default function DashboardPage() {
 
         <Card className="border-none shadow-sm">
           <CardHeader>
-            <CardTitle className="text-xl font-headline">Recent Insight</CardTitle>
+            <CardTitle className="text-xl font-headline">AI Stock Insight</CardTitle>
             <CardDescription>Latest automated strategy analysis</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -139,12 +138,12 @@ export default function DashboardPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
                 <Activity className="w-8 h-8 mb-2 opacity-20" />
-                <p className="text-sm font-body">No insights generated yet.</p>
+                <p className="text-sm font-body">No stock insights generated yet.</p>
               </div>
             )}
             <Link href="/dashboard/analyze" className="block">
               <Button variant="outline" className="w-full gap-2 border-primary/20 text-primary hover:bg-primary/5">
-                Full Analysis Report <ArrowRight className="w-4 h-4" />
+                Full Stock Analysis <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
           </CardContent>
@@ -154,8 +153,8 @@ export default function DashboardPage() {
       {/* Bottom Section: Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'View Assets', icon: Search, href: '/dashboard/investments' },
-          { label: 'Analytics', icon: BarChartIcon, href: '/dashboard/analyze' },
+          { label: 'View Stocks', icon: Search, href: '/dashboard/investments' },
+          { label: 'AI Analytics', icon: BarChartIcon, href: '/dashboard/analyze' },
           { label: 'Add Stock', icon: Plus, href: '/dashboard/add' },
           { label: 'History', icon: HistoryIcon, href: '/dashboard/history' },
         ].map((action) => (
