@@ -1,21 +1,19 @@
 'use client';
 
 import { usePortfolioStore } from '@/lib/store';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
-  History as HistoryIcon, 
   Calendar, 
   ChevronRight, 
   FileText,
-  Clock,
-  ExternalLink
+  Clock
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
 export default function HistoryPage() {
-  const { history, isInitialized } = usePortfolioStore();
+  const { history = [], isInitialized } = usePortfolioStore();
 
   if (!isInitialized) return null;
 
@@ -27,17 +25,19 @@ export default function HistoryPage() {
       </div>
 
       <div className="space-y-4">
-        {history.length > 0 ? (
+        {history && history.length > 0 ? (
           history.map((item) => (
             <Card key={item.id} className="border-none shadow-sm hover:shadow-md transition-all group cursor-pointer overflow-hidden">
               <CardContent className="p-0">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center">
                   {/* Status Indicator Bar */}
-                  <div className={cn(
-                    "w-full sm:w-3 sm:h-auto h-2",
-                    item.status === 'Excellent' || item.status === 'Good' ? 'bg-accent' : 
-                    item.status === 'Moderate' ? 'bg-amber-400' : 'bg-destructive'
-                  )} />
+                  <div className={`w-full sm:w-3 sm:h-auto h-2 ${
+                    item.status === 'Excellent' || item.status === 'Good' 
+                      ? 'bg-accent' 
+                      : item.status === 'Moderate' 
+                        ? 'bg-amber-400' 
+                        : 'bg-destructive'
+                  }`} />
                   
                   <div className="flex-1 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                     <div className="space-y-2 flex-1">
@@ -87,7 +87,7 @@ export default function HistoryPage() {
       </div>
 
       {/* Pagination Placeholder */}
-      {history.length > 0 && (
+      {history && history.length > 0 && (
         <div className="pt-8 border-t flex items-center justify-center">
           <p className="text-xs text-muted-foreground font-body italic">
             End of records. Integration with PostgreSQL will enable unlimited historical storage.
