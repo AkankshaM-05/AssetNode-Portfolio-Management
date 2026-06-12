@@ -47,10 +47,31 @@ const DEFAULT_HISTORY: AnalysisHistory[] = [
   {
     id: 'h1',
     date: new Date('2024-02-10').toISOString(),
-    summary: 'The stock portfolio shows strong performance with key technology holdings driving growth. Diversification is healthy across large-cap tech.',
+    summary:
+      'The stock portfolio shows strong performance with key technology holdings driving growth.',
     status: 'Good',
   },
 ];
+
+function sanitizeInvestments(data: any): Investment[] {
+  if (!Array.isArray(data)) return [];
+
+  return data
+    .filter((inv) =>
+      inv &&
+      typeof inv.companyName === 'string' &&
+      inv.companyName.trim().length > 0 &&
+      inv.assetType === 'Stock'
+    )
+    .map((inv) => ({
+      id: inv.id ?? Math.random().toString(36).substring(7),
+      assetType: 'Stock',
+      companyName: inv.companyName,
+      quantity: Number(inv.quantity) || 0,
+      buyPrice: Number(inv.buyPrice) || 0,
+      purchaseDate: inv.purchaseDate || new Date().toISOString(),
+    }));
+}
 
 export function usePortfolioStore() {
   const [investments, setInvestments] = useState<Investment[]>([]);
@@ -61,36 +82,48 @@ export function usePortfolioStore() {
     const savedInvestments = localStorage.getItem('assetnode_stocks');
     const savedHistory = localStorage.getItem('assetnode_history');
 
-    if (savedInvestments) {
-      setInvestments(JSON.parse(savedInvestments));
-    } else {
-      setInvestments(DEFAULT_STOCKS);
-    }
+    const parsedInvestments = savedInvestments
+      ? JSON.parse(savedInvestments)
+      : null;
 
-    if (savedHistory) {
-      setHistory(JSON.parse(savedHistory));
-    } else {
-      setHistory(DEFAULT_HISTORY);
-    }
-    
+    const cleanedInvestments = sanitizeInvestments(parsedInvestments);
+
+    setInvestments(
+      cleanedInvestments.length > 0 ? cleanedInvestments : DEFAULT_STOCKS
+    );
+
+    setHistory(
+      savedHistory ? JSON.parse(savedHistory) : DEFAULT_HISTORY
+    );
+
     setIsInitialized(true);
   }, []);
 
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem('assetnode_stocks', JSON.stringify(investments));
+      localStorage.setItem(
+        'assetnode_stocks',
+        JSON.stringify(investments)
+      );
     }
   }, [investments, isInitialized]);
 
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem('assetnode_history', JSON.stringify(history));
+      localStorage.setItem(
+        'assetnode_history',
+        JSON.stringify(history)
+      );
     }
   }, [history, isInitialized]);
 
   const addInvestment = (investment: Omit<Investment, 'id'>) => {
-    const newInv = { ...investment, id: Math.random().toString(36).substring(7) };
-    setInvestments((prev) => [...prev, newInv as Investment]);
+    const newInv: Investment = {
+      ...investment,
+      id: Math.random().toString(36).substring(7),
+    };
+
+    setInvestments((prev) => [...prev, newInv]);
   };
 
   const deleteInvestment = (id: string) => {
@@ -98,8 +131,12 @@ export function usePortfolioStore() {
   };
 
   const addHistory = (item: Omit<AnalysisHistory, 'id'>) => {
-    const newItem = { ...item, id: Math.random().toString(36).substring(7) };
-    setHistory((prev) => [newItem as AnalysisHistory, ...prev]);
+    const newItem: AnalysisHistory = {
+      ...item,
+      id: Math.random().toString(36).substring(7),
+    };
+
+    setHistory((prev) => [newItem, ...prev]);
   };
 
   return {

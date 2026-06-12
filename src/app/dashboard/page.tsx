@@ -3,19 +3,21 @@
 import { usePortfolioStore } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  TrendingUp, 
-  Activity, 
-  ArrowRight, 
-  Plus, 
-  BarChart as BarChartIcon, 
+import {
+  TrendingUp,
+  Activity,
+  ArrowRight,
+  Plus,
+  BarChart as BarChartIcon,
   History as HistoryIcon,
   Search
 } from 'lucide-react';
 import Link from 'next/link';
+import { calculateComposition } from '@/lib/portfolioUtils';
 
 export default function OverviewPage() {
   const { investments, history, isInitialized } = usePortfolioStore();
+  const composition = calculateComposition(investments);
 
   if (!isInitialized) {
     return (
@@ -36,7 +38,7 @@ export default function OverviewPage() {
           <p className="text-muted-foreground font-body">Monitor your stock portfolio performance.</p>
         </div>
         <div className="flex gap-2">
-           <Link href="/dashboard/add">
+          <Link href="/dashboard/add">
             <Button className="bg-primary hover:bg-primary/90 text-white font-headline gap-2">
               <Plus className="w-4 h-4" /> Add Stock
             </Button>
@@ -93,31 +95,54 @@ export default function OverviewPage() {
             <CardDescription>Visual distribution by industry sector</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-body font-medium">Technology</span>
-                <span className="font-headline font-bold">70%</span>
+            <div className="space-y-6">
+
+              {/* Technology */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-body font-medium">Technology</span>
+                  <span className="font-headline font-bold">
+                    {composition.Technology ?? 0}%
+                  </span>
+                </div>
+                <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
+                  <div
+                    className="bg-primary h-full"
+                    style={{ width: `${composition.Technology ?? 0}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                <div className="bg-primary h-full w-[70%]" />
+
+              {/* Financials */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-body font-medium">Financials</span>
+                  <span className="font-headline font-bold">
+                    {composition.Financials ?? 0}%
+                  </span>
+                </div>
+                <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
+                  <div
+                    className="bg-accent h-full"
+                    style={{ width: `${composition.Financials ?? 0}%` }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-body font-medium">Financials</span>
-                <span className="font-headline font-bold">20%</span>
-              </div>
-              <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                <div className="bg-accent h-full w-[20%]" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-body font-medium">Others</span>
-                <span className="font-headline font-bold">10%</span>
-              </div>
-              <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                <div className="bg-muted-foreground/30 h-full w-[10%]" />
+
+              {/* Others */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-body font-medium">Others</span>
+                  <span className="font-headline font-bold">
+                    {composition.Others ?? 0}%
+                  </span>
+                </div>
+                <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
+                  <div
+                    className="bg-muted-foreground/30 h-full"
+                    style={{ width: `${composition.Others ?? 0}%` }}
+                  />
+                </div>
               </div>
             </div>
           </CardContent>

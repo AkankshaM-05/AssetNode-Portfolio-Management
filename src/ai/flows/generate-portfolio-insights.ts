@@ -7,16 +7,22 @@
  * - GeneratePortfolioInsightsOutput - The return type for the generatePortfolioInsights function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 // Input Schema
 const StockSchema = z.object({
-  assetType: z.literal('Stock').describe('The type of asset, strictly Stock for this tracker.'),
-  companyName: z.string().describe('The name or ticker symbol of the company.'),
-  quantity: z.number().describe('The number of shares held.'),
-  buyPrice: z.number().describe('The average purchase price per share.'),
-  purchaseDate: z.string().datetime().describe('The date when the stock was purchased (ISO 8601 format).'),
+  assetType: z.literal('Stock'),
+  companyName: z.string(),
+  quantity: z.number(),
+  buyPrice: z.number(),
+  purchaseDate: z.string().datetime(),
+
+  // NEW FIELDS
+  sector: z.string().optional(),
+  industry: z.string().optional(),
+  marketCap: z.number().optional(),
+  livePrice: z.number().optional(),
 });
 
 const GeneratePortfolioInsightsInputSchema = z.object({
@@ -93,8 +99,20 @@ const generatePortfolioInsightsFlow = ai.defineFlow(
     outputSchema: GeneratePortfolioInsightsOutputSchema,
   },
   async (input) => {
-    const { output } = await portfolioInsightsPrompt(input);
-    return output!;
+    try {
+      const result = await portfolioInsightsPrompt(input);
+
+      if (!result?.output) {
+        throw new Error("AI returned empty output");
+      }
+
+      return result.output;
+    } catch (error) {
+      console.error("AI Flow failed:", error);
+      throw new Error(
+        error instanceof Error ? error.message : "AI generation failed"
+      );
+    }
   }
 );
 
