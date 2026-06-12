@@ -5,64 +5,83 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
-        console.log("📩 BODY RECEIVED:", body);
-
-        // ✅ Validate input early
-        if (!body?.investments || !Array.isArray(body.investments)) {
-            console.error("❌ Invalid investments payload");
+        // Input validation (slightly stronger)
+        if (
+            !body?.investments ||
+            !Array.isArray(body.investments) ||
+            body.investments.length === 0
+        ) {
             return NextResponse.json(
-                { error: "investments missing or invalid" },
+                {
+                    success: false,
+                    error: "INVALID_INPUT",
+                    message: "Investments missing or empty",
+                },
                 { status: 400 }
             );
         }
 
-        console.log("🚀 BEFORE AI CALL");
+        // (optional safety) normalize input
+        const sanitizedInvestments = body.investments.map((inv: any) => ({
+            assetType: inv.assetType,
+            companyName: inv.companyName,
+            quantity: Number(inv.quantity),
+            buyPrice: Number(inv.buyPrice),
+            purchaseDate: inv.purchaseDate,
+        }));
 
-        // 🔥 CALL AI FLOW
+        // AI call
         const result = await generatePortfolioInsights({
-            investments: body.investments
+            investments: sanitizedInvestments,
         });
 
-        console.log("✅ AFTER AI CALL SUCCESS");
-        console.log("🧾 AI RAW RESULT:", JSON.stringify(result, null, 2));
-
-        // 🔒 SAFETY CHECK (VERY IMPORTANT)
+        // AI response validation
         if (!result || !result.portfolioHealth) {
-            console.error("❌ AI returned invalid response:", result);
-
             return NextResponse.json(
                 {
-                    error: "AI returned invalid response",
-                    debug: result
+                    success: false,
+                    error: "INVALID_AI_RESPONSE",
+                    message: "AI returned incomplete data",
                 },
                 { status: 500 }
             );
         }
 
-        // ✅ FINAL RESPONSE
-        return NextResponse.json(result);
+        // consistent response shape
+        return NextResponse.json({
+            success: true,
+            data: result,
+        });
 
     } catch (error: any) {
-        console.error("🔥 API CRASH:", error);
+        console.error("🔥 ANALYSIS API ERROR:", error);
 
-        // ✅ Check for quota/rate-limit errors (by message)
-        if (error?.message?.includes('RESOURCE_EXHAUSTED') ||
-            error?.message?.includes('quota') ||
-            error?.originalMessage?.includes('quota')) {
+        const message = error?.message || "";
+        const status = error?.status || error?.code;
+
+        const isQuotaError =
+            status === 429 ||
+            message.includes("RESOURCE_EXHAUSTED") ||
+            message.includes("quota") ||
+            message.includes("RateLimit") ||
+            message.includes("PerMinutePerProject");
+
+        if (isQuotaError) {
             return NextResponse.json(
                 {
-                    error: "API quota exceeded. Please try again in a few minutes.",
-                    type: "QUOTA_EXCEEDED"
+                    success: false,
+                    error: "AI_QUOTA_EXCEEDED",
+                    message: "AI limit reached for now. Please wait a few minutes and try again.",
                 },
                 { status: 429 }
             );
         }
 
-        // ✅ Generic error fallback
         return NextResponse.json(
             {
-                error: "Analysis failed. Please try again.",
-                message: error?.message || error?.originalMessage,
+                success: false,
+                error: "ANALYSIS_FAILED",
+                message: "We couldn't complete the analysis right now. Please try again shortly.",
             },
             { status: 500 }
         );

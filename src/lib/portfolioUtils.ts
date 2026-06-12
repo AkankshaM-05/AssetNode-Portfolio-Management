@@ -1,36 +1,34 @@
 import { Investment } from './store';
 
 export function calculateComposition(investments: Investment[]) {
-    const total = investments.reduce(
+    const valid = investments.filter(
+        (inv) =>
+            inv.quantity > 0 &&
+            inv.buyPrice > 0 &&
+            inv.sector
+    );
+
+    const total = valid.reduce(
         (sum, inv) => sum + inv.quantity * inv.buyPrice,
         0
     );
 
-    const sectors: Record<string, number> = {
-        Technology: 0,
-        Financials: 0,
-        Others: 0,
-    };
+    if (total === 0) return {};
 
-    investments.forEach((inv) => {
+    const map: Record<string, number> = {};
+
+    valid.forEach((inv) => {
         const value = inv.quantity * inv.buyPrice;
+        const sector = inv.sector || 'Others';
 
-        const name = inv.companyName.toLowerCase();
-
-        if (name.includes("apple") || name.includes("microsoft") || name.includes("tesla") || name.includes("nvidia")) {
-            sectors.Technology += value;
-        }
-        else if (name.includes("hdfc") || name.includes("bank") || name.includes("bajaj")) {
-            sectors.Financials += value;
-        }
-        else {
-            sectors.Others += value;
-        }
+        map[sector] = (map[sector] || 0) + value;
     });
 
-    return {
-        Technology: Math.round((sectors.Technology / total) * 100) || 0,
-        Financials: Math.round((sectors.Financials / total) * 100) || 0,
-        Others: Math.round((sectors.Others / total) * 100) || 0,
-    };
+    const result: Record<string, number> = {};
+
+    Object.keys(map).forEach((sector) => {
+        result[sector] = Number(((map[sector] / total) * 100).toFixed(2));
+    });
+
+    return result;
 }

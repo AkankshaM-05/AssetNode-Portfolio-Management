@@ -1,8 +1,12 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 
 export interface Investment {
   id: string;
-  assetType: 'Stock';
+  assetType: "Stock";
+  ticker?: string;
+  sector?: string;
   companyName: string;
   quantity: number;
   buyPrice: number;
@@ -18,34 +22,30 @@ export interface AnalysisHistory {
 
 const DEFAULT_STOCKS: Investment[] = [
   {
-    id: '1',
+    id: crypto.randomUUID(),
     assetType: 'Stock',
-    companyName: 'Apple Inc. (AAPL)',
+    ticker: 'AAPL',
+    sector: 'Technology',
+    companyName: 'Apple Inc.',
     quantity: 10,
-    buyPrice: 150.0,
+    buyPrice: 150,
     purchaseDate: new Date('2023-01-15').toISOString(),
   },
   {
-    id: '2',
+    id: crypto.randomUUID(),
     assetType: 'Stock',
-    companyName: 'Microsoft Corp. (MSFT)',
+    ticker: 'MSFT',
+    sector: 'Technology',
+    companyName: 'Microsoft Corp.',
     quantity: 5,
-    buyPrice: 280.0,
+    buyPrice: 280,
     purchaseDate: new Date('2023-03-22').toISOString(),
-  },
-  {
-    id: '3',
-    assetType: 'Stock',
-    companyName: 'Tesla Inc. (TSLA)',
-    quantity: 15,
-    buyPrice: 190.0,
-    purchaseDate: new Date('2023-06-10').toISOString(),
   },
 ];
 
 const DEFAULT_HISTORY: AnalysisHistory[] = [
   {
-    id: 'h1',
+    id: crypto.randomUUID(),
     date: new Date('2024-02-10').toISOString(),
     summary:
       'The stock portfolio shows strong performance with key technology holdings driving growth.',
@@ -57,20 +57,27 @@ function sanitizeInvestments(data: any): Investment[] {
   if (!Array.isArray(data)) return [];
 
   return data
-    .filter((inv) =>
-      inv &&
-      typeof inv.companyName === 'string' &&
-      inv.companyName.trim().length > 0 &&
-      inv.assetType === 'Stock'
-    )
-    .map((inv) => ({
-      id: inv.id ?? Math.random().toString(36).substring(7),
-      assetType: 'Stock',
-      companyName: inv.companyName,
-      quantity: Number(inv.quantity) || 0,
-      buyPrice: Number(inv.buyPrice) || 0,
-      purchaseDate: inv.purchaseDate || new Date().toISOString(),
-    }));
+    .map((inv) => {
+      if (!inv || typeof inv.companyName !== 'string') return null;
+      if (inv.assetType !== 'Stock') return null;
+
+      const quantity = Number(inv.quantity);
+      const buyPrice = Number(inv.buyPrice);
+
+      if (isNaN(quantity) || isNaN(buyPrice)) return null;
+
+      return {
+        id: inv.id ?? crypto.randomUUID(),
+        assetType: 'Stock',
+        ticker: inv.ticker?.trim() || undefined,
+        sector: inv.sector?.trim() || 'Unknown',
+        companyName: inv.companyName,
+        quantity,
+        buyPrice,
+        purchaseDate: inv.purchaseDate || new Date().toISOString(),
+      };
+    })
+    .filter(Boolean) as Investment[];
 }
 
 export function usePortfolioStore() {
@@ -82,11 +89,9 @@ export function usePortfolioStore() {
     const savedInvestments = localStorage.getItem('assetnode_stocks');
     const savedHistory = localStorage.getItem('assetnode_history');
 
-    const parsedInvestments = savedInvestments
-      ? JSON.parse(savedInvestments)
-      : null;
-
-    const cleanedInvestments = sanitizeInvestments(parsedInvestments);
+    const cleanedInvestments = sanitizeInvestments(
+      savedInvestments ? JSON.parse(savedInvestments) : null
+    );
 
     setInvestments(
       cleanedInvestments.length > 0 ? cleanedInvestments : DEFAULT_STOCKS
@@ -100,40 +105,39 @@ export function usePortfolioStore() {
   }, []);
 
   useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem(
-        'assetnode_stocks',
-        JSON.stringify(investments)
-      );
-    }
+    if (!isInitialized) return;
+    localStorage.setItem('assetnode_stocks', JSON.stringify(investments));
   }, [investments, isInitialized]);
 
   useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem(
-        'assetnode_history',
-        JSON.stringify(history)
-      );
-    }
+    if (!isInitialized) return;
+    localStorage.setItem('assetnode_history', JSON.stringify(history));
   }, [history, isInitialized]);
 
   const addInvestment = (investment: Omit<Investment, 'id'>) => {
-    const newInv: Investment = {
+    const quantity = Number(investment.quantity);
+    const buyPrice = Number(investment.buyPrice);
+
+    if (isNaN(quantity) || isNaN(buyPrice)) return;
+
+    const newInvestment: Investment = {
       ...investment,
-      id: Math.random().toString(36).substring(7),
+      quantity,
+      buyPrice,
+      id: crypto.randomUUID(),
     };
 
-    setInvestments((prev) => [...prev, newInv]);
+    setInvestments((prev) => [...prev, newInvestment]);
   };
 
   const deleteInvestment = (id: string) => {
-    setInvestments((prev) => prev.filter((i) => i.id !== id));
+    setInvestments((prev) => prev.filter((inv) => inv.id !== id));
   };
 
   const addHistory = (item: Omit<AnalysisHistory, 'id'>) => {
     const newItem: AnalysisHistory = {
       ...item,
-      id: Math.random().toString(36).substring(7),
+      id: crypto.randomUUID(),
     };
 
     setHistory((prev) => [newItem, ...prev]);

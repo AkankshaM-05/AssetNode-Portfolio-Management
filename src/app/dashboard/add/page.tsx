@@ -3,172 +3,269 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePortfolioStore } from '@/lib/store';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, CheckCircle2, AlertCircle, Briefcase } from 'lucide-react';
+
+import {
+  CheckCircle2,
+  AlertCircle,
+} from 'lucide-react';
+
 import Link from 'next/link';
 
 export default function AddStockPage() {
   const router = useRouter();
   const { addInvestment } = usePortfolioStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     companyName: '',
+    ticker: '',
+    sector: '',
     quantity: '',
     buyPrice: '',
     purchaseDate: new Date().toISOString().split('T')[0],
   });
 
+  const searchStocks = async (q: string) => {
+    if (!q || q.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/search-stock?q=${q}`);
+      const data = await res.json();
+      setSuggestions(Array.isArray(data) ? data : []);
+    } catch {
+      setSuggestions([]);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    const qty = parseFloat(formData.quantity);
-    const price = parseFloat(formData.buyPrice);
+    const qty = Number(formData.quantity);
+    const price = Number(formData.buyPrice);
 
-    if (!formData.companyName) return setError('Please enter a company name or ticker');
-    if (isNaN(qty) || qty <= 0) return setError('Invalid quantity');
-    if (isNaN(price) || price <= 0) return setError('Invalid buy price');
+    if (!formData.companyName) return setError('Select company');
+    if (!formData.ticker) return setError('Select valid stock');
+    if (!qty || qty <= 0) return setError('Invalid quantity');
+    if (!price || price <= 0) return setError('Invalid price');
 
     setIsLoading(true);
-    
-    // Simulate API call
+
     setTimeout(() => {
       addInvestment({
         assetType: 'Stock',
         companyName: formData.companyName,
+        ticker: formData.ticker,
+        sector: formData.sector || 'Unknown',
         quantity: qty,
         buyPrice: price,
         purchaseDate: new Date(formData.purchaseDate).toISOString(),
       });
+
       setIsLoading(false);
       setSuccess(true);
-      
+
       setTimeout(() => {
         router.push('/dashboard/investments');
-      }, 1500);
-    }, 800);
+      }, 1000);
+    }, 400);
   };
 
   if (success) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 animate-in zoom-in-95">
-        <div className="p-8 bg-accent/10 rounded-full">
-          <CheckCircle2 className="w-20 h-20 text-accent" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 animate-in fade-in">
+        <div className="p-6 bg-primary/5 rounded-full">
+          <CheckCircle2 className="w-16 h-16 text-primary" />
         </div>
-        <div className="space-y-2">
-          <h2 className="text-3xl font-headline font-bold text-primary">Stock Added Successfully</h2>
-          <p className="text-muted-foreground font-body">The new position is now part of your portfolio.</p>
-        </div>
-        <p className="text-sm text-primary animate-pulse font-headline font-bold">Redirecting to Stock Registry...</p>
+
+        <h2 className="text-2xl font-bold text-primary">
+          Stock Added Successfully
+        </h2>
+
+        <p className="text-sm text-muted-foreground">
+          Redirecting to portfolio...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/investments">
-          <Button variant="ghost" size="icon" className="rounded-full hover:bg-secondary">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-headline font-bold text-primary">Add Stock</h1>
-          <p className="text-muted-foreground font-body">Log a new stock purchase to your portfolio.</p>
-        </div>
+    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500">
+
+      {/* HEADER */}
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold text-primary">
+          Add Stock
+        </h1>
+        <p className="text-muted-foreground">
+          Log a new position to your portfolio
+        </p>
       </div>
 
-      <Card className="border-none shadow-md overflow-hidden bg-white">
-        <div className="bg-primary h-1 w-full opacity-10" />
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-primary/5 text-primary rounded-lg">
-              <Briefcase className="w-5 h-5" />
-            </div>
-            <CardTitle className="text-xl font-headline font-bold">New Stock Position</CardTitle>
-          </div>
-          <CardDescription className="text-sm font-body">Enter the essential metrics for your new stock holding.</CardDescription>
+      {/* CARD */}
+      <Card className="border-none shadow-sm overflow-hidden bg-white">
+
+        {/* top accent line */}
+        <div className="h-1 w-full bg-primary/10" />
+
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-xl text-primary font-bold">
+            New Stock Position
+          </CardTitle>
+
+          <CardDescription>
+            Search and select stock, then enter investment details
+          </CardDescription>
         </CardHeader>
+
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-8 py-6">
+          <CardContent className="space-y-6">
+
+            {/* ERROR */}
             {error && (
-              <div className="p-4 bg-destructive/5 text-destructive border border-destructive/20 rounded-xl flex items-center gap-3 text-sm font-medium animate-in slide-in-from-top-2">
-                <AlertCircle className="w-5 h-5" /> {error}
+              <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 p-3 rounded-md text-sm">
+                <AlertCircle size={16} />
+                {error}
               </div>
             )}
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-2.5 md:col-span-2">
-                <Label htmlFor="companyName" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Company Name / Ticker</Label>
-                <Input 
-                  id="companyName" 
-                  placeholder="e.g. Nvidia Corp (NVDA)" 
-                  required 
-                  className="bg-secondary/20 border-transparent focus:border-primary/20 h-12 text-base font-body"
-                  value={formData.companyName}
-                  onChange={(e) => setFormData({...formData, companyName: e.target.value})}
-                />
-              </div>
-              <div className="space-y-2.5">
-                <Label htmlFor="quantity" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Quantity (Shares)</Label>
-                <Input 
-                  id="quantity" 
-                  type="number" 
-                  step="0.0001"
-                  placeholder="0.00" 
-                  required 
-                  className="bg-secondary/20 border-transparent focus:border-primary/20 h-12 text-base font-body"
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                />
-              </div>
-              <div className="space-y-2.5">
-                <Label htmlFor="buyPrice" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Buy Price (USD)</Label>
-                <Input 
-                  id="buyPrice" 
-                  type="number" 
-                  step="0.01"
-                  placeholder="0.00" 
-                  required 
-                  className="bg-secondary/20 border-transparent focus:border-primary/20 h-12 text-base font-body"
-                  value={formData.buyPrice}
-                  onChange={(e) => setFormData({...formData, buyPrice: e.target.value})}
-                />
-              </div>
-              <div className="space-y-2.5 md:col-span-2">
-                <Label htmlFor="purchaseDate" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Purchase Date</Label>
-                <Input 
-                  id="purchaseDate" 
-                  type="date" 
-                  required 
-                  className="bg-secondary/20 border-transparent focus:border-primary/20 h-12 text-base font-body"
-                  value={formData.purchaseDate}
-                  onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})}
-                />
-                <p className="text-[10px] text-muted-foreground font-body">Date of acquisition as recorded in your broker account.</p>
-              </div>
+
+            {/* SEARCH */}
+            <div className="relative space-y-2">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                Company
+              </Label>
+
+              <Input
+                value={formData.companyName}
+                placeholder="Type Apple, Tesla..."
+                className="h-11 focus-visible:ring-2 focus-visible:ring-primary/20"
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  setFormData({
+                    ...formData,
+                    companyName: value,
+                    ticker: '',
+                    sector: '',
+                  });
+
+                  searchStocks(value);
+                }}
+              />
+
+              {/* DROPDOWN */}
+              {suggestions.length > 0 && (
+                <div className="absolute z-50 w-full bg-white border border-muted/30 rounded-md shadow-lg mt-1 overflow-hidden">
+
+                  {suggestions.map((s, i) => (
+                    <div
+                      key={i}
+                      className="p-3 hover:bg-primary/5 cursor-pointer transition"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          companyName: s.name || '',
+                          ticker: s.ticker || '',
+                          sector: s.sector || 'Unknown',
+                        });
+
+                        setSuggestions([]);
+                      }}
+                    >
+                      <div className="font-medium text-primary">
+                        {s.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {s.ticker} • {s.sector || 'Unknown'}
+                      </div>
+                    </div>
+                  ))}
+
+                </div>
+              )}
             </div>
+
+            {/* INPUT GRID */}
+            <div className="grid gap-5">
+
+              <Input
+                placeholder="Quantity"
+                type="number"
+                className="h-11"
+                value={formData.quantity}
+                onChange={(e) =>
+                  setFormData({ ...formData, quantity: e.target.value })
+                }
+              />
+
+              <Input
+                placeholder="Buy Price"
+                type="number"
+                className="h-11"
+                value={formData.buyPrice}
+                onChange={(e) =>
+                  setFormData({ ...formData, buyPrice: e.target.value })
+                }
+              />
+
+              <Input
+                type="date"
+                className="h-11"
+                value={formData.purchaseDate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    purchaseDate: e.target.value,
+                  })
+                }
+              />
+
+            </div>
+
           </CardContent>
-          <CardFooter className="flex flex-col sm:flex-row gap-4 pt-6 border-t bg-secondary/10 px-6 py-8">
-            <Button 
-              type="submit" 
-              className="w-full sm:flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-headline font-bold text-base shadow-lg shadow-primary/20"
+
+          {/* FOOTER */}
+          <div className="flex gap-3 p-5 border-t bg-secondary/10">
+
+            <Button
+              type="submit"
               disabled={isLoading}
+              className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold"
             >
-              {isLoading ? 'Processing...' : 'Save Stock Position'}
+              {isLoading ? 'Saving...' : 'Save Stock'}
             </Button>
-            <Link href="/dashboard/investments" className="w-full sm:flex-1">
-              <Button type="button" variant="outline" className="w-full h-12 font-headline font-bold text-base border-primary/10 hover:bg-white">
+
+            <Link href="/dashboard/investments" className="flex-1">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-primary/20 hover:bg-primary/5"
+              >
                 Cancel
               </Button>
             </Link>
-          </CardFooter>
+
+          </div>
+
         </form>
       </Card>
     </div>
