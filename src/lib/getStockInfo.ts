@@ -17,15 +17,17 @@ export async function getStockInfo(symbol: string) {
 
         return {
             symbol: cleanSymbol,
+
             price:
                 priceModule?.regularMarketPrice ??
                 quote?.regularMarketPrice ??
                 null,
 
             currency: "INR",
-            sector: profileModule?.sector ?? "Others",
-            marketCap: priceModule?.marketCap ?? null,
+
+            sector: profileModule?.sector?.trim() || "Others",
         };
+
     } catch (error) {
         console.error(`Failed to get stock info for ${symbol}`, error);
 
@@ -34,7 +36,6 @@ export async function getStockInfo(symbol: string) {
             price: null,
             currency: "INR",
             sector: "Others",
-            marketCap: null,
         };
     }
 }

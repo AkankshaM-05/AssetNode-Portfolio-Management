@@ -37,13 +37,16 @@ export default function OverviewPage() {
 
   const cleanedInvestments = investments.map((inv) => ({
     ...inv,
-    sector: inv.sector && inv.sector !== 'Unknown' ? inv.sector : 'Others',
+    sector: inv.sector?.trim() ? inv.sector : 'Others',
   }));
 
   const composition = calculateComposition(cleanedInvestments);
 
+  console.log("INVESTMENTS:", investments);
+  console.log("COMPOSITION:", composition);
+
   const totalValue = investments.reduce(
-    (sum, inv) => sum + inv.quantity * inv.buyPrice,
+    (sum, inv) => sum + Number(inv.quantity || 0) * Number(inv.buyPrice || 0),
     0
   );
 

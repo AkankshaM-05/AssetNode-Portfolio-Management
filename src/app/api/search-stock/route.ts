@@ -22,7 +22,7 @@ export async function GET(req: Request) {
         const results = (data?.quotes || []).map((item: any) => ({
             name: item.longname || item.shortname || item.symbol,
             ticker: item.symbol,
-            sector: item.sector || item.industry || "Unknown",
+            sector: item.sector || "Unknown",
         }));
 
         return NextResponse.json(results);

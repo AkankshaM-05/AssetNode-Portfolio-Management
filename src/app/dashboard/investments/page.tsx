@@ -43,7 +43,6 @@ export default function StockRegistryPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const [filters, setFilters] = useState({
-    sector: '',
     minQty: '',
     maxQty: '',
     minCost: '',
@@ -53,16 +52,12 @@ export default function StockRegistryPage() {
   const filteredStocks = useMemo(() => {
     return investments.filter((inv) => {
       const matchesSearch =
-        inv.companyName
+        (inv.companyName || '')
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
       const qty = Number(inv.quantity);
       const cost = Number(inv.buyPrice);
-      const sector = inv.sector || 'Others';
-
-      const matchesSector =
-        !filters.sector || sector === filters.sector;
 
       const matchesQty =
         (!filters.minQty || qty >= Number(filters.minQty)) &&
@@ -74,7 +69,6 @@ export default function StockRegistryPage() {
 
       return (
         matchesSearch &&
-        matchesSector &&
         matchesQty &&
         matchesCost
       );
@@ -130,17 +124,6 @@ export default function StockRegistryPage() {
           {/* FILTER PANEL (NO UI CHANGE STYLE) */}
           {showFilters && (
             <div className="flex flex-wrap gap-2 bg-white border border-primary/10 p-3 rounded-md">
-              <Input
-                placeholder="Sector"
-                className="w-32"
-                value={filters.sector}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    sector: e.target.value,
-                  })
-                }
-              />
 
               <Input
                 placeholder="Min Qty"
@@ -198,7 +181,6 @@ export default function StockRegistryPage() {
                 variant="outline"
                 onClick={() =>
                   setFilters({
-                    sector: '',
                     minQty: '',
                     maxQty: '',
                     minCost: '',
@@ -218,7 +200,8 @@ export default function StockRegistryPage() {
         {filteredStocks.length > 0 ? (
           filteredStocks.map((inv) => {
             const totalValue =
-              inv.quantity * inv.buyPrice;
+              Number(inv.quantity || 0) *
+              Number(inv.buyPrice || 0);
 
             return (
               <Card
@@ -235,7 +218,7 @@ export default function StockRegistryPage() {
 
                     <div>
                       <CardTitle className="text-lg font-headline font-bold text-primary truncate max-w-[160px]">
-                        {inv.companyName}
+                        {inv.companyName || 'Unknown Company'}
                       </CardTitle>
 
                       <CardDescription className="text-[10px] uppercase font-headline font-bold tracking-widest text-primary/40">
@@ -292,7 +275,7 @@ export default function StockRegistryPage() {
                       </p>
 
                       <p className="font-headline font-bold text-primary">
-                        ₹{inv.buyPrice.toFixed(2)}
+                        ₹{Number(inv.buyPrice || 0).toFixed(2)}
                       </p>
                     </div>
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePortfolioStore } from '@/lib/store';
+
 import {
   Card,
   CardContent,
@@ -53,7 +54,6 @@ export default function StockAnalysisPage() {
       const result = await res.json();
 
       if (!res.ok || !result?.success) {
-
         switch (result?.error ?? "UNKNOWN") {
           case "AI_QUOTA_EXCEEDED":
             setError(result?.message ?? "AI limit reached. Try again later.");
@@ -69,7 +69,6 @@ export default function StockAnalysisPage() {
               "Analysis couldn’t be completed at the moment. Please try again shortly."
             );
         }
-
         return;
       }
 
@@ -78,7 +77,7 @@ export default function StockAnalysisPage() {
       addHistory({
         date: new Date().toISOString(),
         summary: result.data?.portfolioHealth?.summary ?? "",
-        status: result.data?.portfolioHealth?.overallStatus ?? "Unknown",
+        status: result.data?.portfolioHealth?.overallStatus ?? "Moderate",
       });
 
     } catch (err) {

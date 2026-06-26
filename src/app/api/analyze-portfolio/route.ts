@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/supabase";
 import { NextResponse } from 'next/server';
 import { generatePortfolioInsights } from '@/ai/flows/generate-portfolio-insights';
 
@@ -27,13 +28,34 @@ export async function POST(req: Request) {
             companyName: inv.companyName,
             quantity: Number(inv.quantity),
             buyPrice: Number(inv.buyPrice),
-            purchaseDate: inv.purchaseDate,
+            purchaseDate: new Date(inv.purchaseDate).toISOString(),
         }));
 
         // AI call
         const result = await generatePortfolioInsights({
             investments: sanitizedInvestments,
         });
+
+        if (!result || !result.portfolioHealth) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "INVALID_AI_RESPONSE",
+                    message: "AI returned incomplete data",
+                },
+                { status: 500 }
+            );
+        }
+
+        await supabase
+            .from("analysis_history")
+            .insert([
+                {
+                    user_id: "test-user",
+                    status: result.portfolioHealth.overallStatus,
+                    summary: result.portfolioHealth.summary,
+                },
+            ]);
 
         // AI response validation
         if (!result || !result.portfolioHealth) {

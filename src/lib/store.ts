@@ -17,67 +17,7 @@ export interface AnalysisHistory {
   id: string;
   date: string;
   summary: string;
-  status: 'Excellent' | 'Good' | 'Moderate' | 'Poor' | 'Critical';
-}
-
-const DEFAULT_STOCKS: Investment[] = [
-  {
-    id: crypto.randomUUID(),
-    assetType: 'Stock',
-    ticker: 'AAPL',
-    sector: 'Technology',
-    companyName: 'Apple Inc.',
-    quantity: 10,
-    buyPrice: 150,
-    purchaseDate: new Date('2023-01-15').toISOString(),
-  },
-  {
-    id: crypto.randomUUID(),
-    assetType: 'Stock',
-    ticker: 'MSFT',
-    sector: 'Technology',
-    companyName: 'Microsoft Corp.',
-    quantity: 5,
-    buyPrice: 280,
-    purchaseDate: new Date('2023-03-22').toISOString(),
-  },
-];
-
-const DEFAULT_HISTORY: AnalysisHistory[] = [
-  {
-    id: crypto.randomUUID(),
-    date: new Date('2024-02-10').toISOString(),
-    summary:
-      'The stock portfolio shows strong performance with key technology holdings driving growth.',
-    status: 'Good',
-  },
-];
-
-function sanitizeInvestments(data: any): Investment[] {
-  if (!Array.isArray(data)) return [];
-
-  return data
-    .map((inv) => {
-      if (!inv || typeof inv.companyName !== 'string') return null;
-      if (inv.assetType !== 'Stock') return null;
-
-      const quantity = Number(inv.quantity);
-      const buyPrice = Number(inv.buyPrice);
-
-      if (isNaN(quantity) || isNaN(buyPrice)) return null;
-
-      return {
-        id: inv.id ?? crypto.randomUUID(),
-        assetType: 'Stock',
-        ticker: inv.ticker?.trim() || undefined,
-        sector: inv.sector?.trim() || 'Unknown',
-        companyName: inv.companyName,
-        quantity,
-        buyPrice,
-        purchaseDate: inv.purchaseDate || new Date().toISOString(),
-      };
-    })
-    .filter(Boolean) as Investment[];
+  status: 'Excellent' | 'Good' | 'Moderate' | 'Poor' | 'Critical' | 'Unknown';
 }
 
 export function usePortfolioStore() {
@@ -85,70 +25,101 @@ export function usePortfolioStore() {
   const [history, setHistory] = useState<AnalysisHistory[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // LOAD INVESTMENTS
+  const fetchInvestments = async () => {
+    try {
+      const res = await fetch('/api/investments');
+      const json = await res.json();
+
+      if (json.success) {
+        setInvestments(json.data || []);
+      }
+    } catch (err) {
+      console.error('fetchInvestments failed', err);
+    }
+  };
+
+  // LOAD HISTORY
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch('/api/analysis-history');
+      const json = await res.json();
+
+      if (json.success && Array.isArray(json.data)) {
+        const formatted: AnalysisHistory[] = json.data.map((item: any) => ({
+          id: item.id,
+          date: item.created_at,
+          summary: item.summary ?? "",
+          status: (item.status as AnalysisHistory['status']) ?? "Unknown",
+        }));
+
+        setHistory(formatted);
+      }
+    } catch (err) {
+      console.error('fetchHistory failed', err);
+    }
+  };
+
   useEffect(() => {
-    const savedInvestments = localStorage.getItem('assetnode_stocks');
-    const savedHistory = localStorage.getItem('assetnode_history');
-
-    const cleanedInvestments = sanitizeInvestments(
-      savedInvestments ? JSON.parse(savedInvestments) : null
-    );
-
-    setInvestments(
-      cleanedInvestments.length > 0 ? cleanedInvestments : DEFAULT_STOCKS
-    );
-
-    setHistory(
-      savedHistory ? JSON.parse(savedHistory) : DEFAULT_HISTORY
-    );
-
-    setIsInitialized(true);
+    Promise.all([fetchInvestments(), fetchHistory()])
+      .finally(() => setIsInitialized(true));
   }, []);
 
-  useEffect(() => {
-    if (!isInitialized) return;
-    localStorage.setItem('assetnode_stocks', JSON.stringify(investments));
-  }, [investments, isInitialized]);
+  // ADD INVESTMENT
+  const addInvestment = async (investment: Omit<Investment, 'id'>) => {
+    try {
+      const res = await fetch('/api/investments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(investment),
+      });
 
-  useEffect(() => {
-    if (!isInitialized) return;
-    localStorage.setItem('assetnode_history', JSON.stringify(history));
-  }, [history, isInitialized]);
+      const json = await res.json();
 
-  const addInvestment = (investment: Omit<Investment, 'id'>) => {
-    const quantity = Number(investment.quantity);
-    const buyPrice = Number(investment.buyPrice);
-
-    if (isNaN(quantity) || isNaN(buyPrice)) return;
-
-    const newInvestment: Investment = {
-      ...investment,
-      quantity,
-      buyPrice,
-      id: crypto.randomUUID(),
-    };
-
-    setInvestments((prev) => [...prev, newInvestment]);
+      if (json.success) {
+        await fetchInvestments();
+      }
+    } catch (err) {
+      console.error('addInvestment failed', err);
+    }
   };
 
-  const deleteInvestment = (id: string) => {
-    setInvestments((prev) => prev.filter((inv) => inv.id !== id));
+  // DELETE INVESTMENT
+  const deleteInvestment = async (id: string) => {
+    try {
+      const res = await fetch('/api/investments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      const json = await res.json();
+
+      if (json.success) {
+        setInvestments(prev => prev.filter(i => i.id !== id));
+      }
+    } catch (err) {
+      console.error('deleteInvestment failed', err);
+    }
   };
 
-  const addHistory = (item: Omit<AnalysisHistory, 'id'>) => {
+  // ADD HISTORY (UI ONLY)
+  const addHistory = async (item: Omit<AnalysisHistory, 'id'>) => {
     const newItem: AnalysisHistory = {
-      ...item,
       id: crypto.randomUUID(),
+      ...item,
     };
 
-    setHistory((prev) => [newItem, ...prev]);
+    setHistory(prev => [newItem, ...prev]);
   };
 
   return {
     investments,
     history,
+    isInitialized,
     addInvestment,
     deleteInvestment,
     addHistory,
-    isInitialized,
+    fetchHistory,
   };
 }

@@ -1,33 +1,30 @@
 import { Investment } from './store';
 
 export function calculateComposition(investments: Investment[]) {
-    const valid = investments.filter(
-        (inv) =>
-            inv.quantity > 0 &&
-            inv.buyPrice > 0 &&
-            inv.sector
-    );
-
-    const total = valid.reduce(
-        (sum, inv) => sum + inv.quantity * inv.buyPrice,
-        0
-    );
-
-    if (total === 0) return {};
-
     const map: Record<string, number> = {};
 
-    valid.forEach((inv) => {
-        const value = inv.quantity * inv.buyPrice;
-        const sector = inv.sector || 'Others';
+    let total = 0;
+
+    investments.forEach((inv) => {
+        const quantity = Number(inv.quantity || 0);
+        const price = Number(inv.buyPrice || 0);
+
+        if (quantity <= 0 || price <= 0) return;
+
+        const sector = inv.sector?.trim() || 'Others';
+        const value = quantity * price;
+
+        total += value;
 
         map[sector] = (map[sector] || 0) + value;
     });
 
+    if (total === 0) return {};
+
     const result: Record<string, number> = {};
 
-    Object.keys(map).forEach((sector) => {
-        result[sector] = Number(((map[sector] / total) * 100).toFixed(2));
+    Object.entries(map).forEach(([sector, value]) => {
+        result[sector] = Number(((value / total) * 100).toFixed(2));
     });
 
     return result;

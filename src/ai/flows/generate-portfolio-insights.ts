@@ -20,7 +20,6 @@ const StockSchema = z.object({
 
   // NEW FIELDS
   sector: z.string().optional(),
-  industry: z.string().optional(),
   marketCap: z.number().optional(),
   livePrice: z.number().optional(),
 });
