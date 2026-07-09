@@ -47,8 +47,8 @@ The platform demonstrates full-stack architecture: frontend UI â†’ API routes â†
 | Layer | Technology |
 |-------|-----------|
 | **Frontend** | Next.js 15, React, TypeScript, Tailwind CSS, shadcn/ui |
-| **Backend** | Next.js API Routes |
-| **Database** | Supabase (PostgreSQL) |
+| **Backend** | Next.js API Routes (server-side business logic & secure database access) |
+| **Database** | Supabase (PostgreSQL, RLS Enabled) |
 | **AI Integration** | Google Gemini API, Genkit Framework |
 | **Deployment** | Vercel |
 
@@ -112,13 +112,11 @@ Create a `.env.local` file:
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # Google Gemini
 GOOGLE_GENKIT_API_KEY=your_gemini_api_key
 
-# Optional
-NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
 ### Installation
